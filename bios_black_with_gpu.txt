@@ -1,0 +1,16 @@
+### Hardware
+# CPU: Intel(R) Core(TM) i9-14900K Intel(R) Core(TM)
+# GPU: NVIDIA GeForce RTX 4070 Ti SUPER
+i# Motherboard: Micro-Star B760 GAMING PLUS WIFI (MS-7D98)
+
+### Software
+# OS: Ubuntu 24.04.1 LTS
+# BIOS version: H.70
+
+### Problem
+# After plguin and power on the gpu, I cannot enter BIOS page anymore. Hitting "del" key during bootup will lead to a black screen.
+
+### Solution
+
+# Disconnect gpu before entering BIOS. It is sufficient to simply disconnect the gpu power line, instead of removing the gpu from PCIe slot.
+
