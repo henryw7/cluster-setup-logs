@@ -1,0 +1,33 @@
+
+### Software
+# OS: Ubuntu 24.04.1 LTS
+
+### Problem
+# I want to use a different port number for sshd other than 22, like 2222.
+# Add "Port 2222" to /etc/ssh/sshd_config doesn't work.
+
+### Solution
+
+systemctl edit ssh.socket # This command will nano /etc/systemd/system/ssh.socket.d/listen.conf, if the folder doesn't exist then it'll fail.
+
+mkdir /etc/systemd/system/ssh.socket.d/
+vim /etc/systemd/system/ssh.socket.d/listen.conf
+##########
+[Socket]
+ListenStream=
+ListenStream=2222
+##########
+
+# The line "ListenStream=" will turn off port 22.
+
+systemctl daemon-reload
+systemctl restart ssh.socket
+systemctl restart ssh
+
+netstat -plnt
+# Check the open ports, my working outputs are
+# Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+# ...
+# tcp6       0      0 :::22                   :::*                    LISTEN      -
+# tcp6       0      0 :::2222                 :::*                    LISTEN      -
+
