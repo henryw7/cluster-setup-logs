@@ -1,0 +1,73 @@
+
+### Software on router machine
+# OS: Ubuntu 24.04.1 LTS
+
+### Software on machines inside the private network
+# OS: Ubuntu 24.04.1 LTS
+
+### Problem
+# After connecting the router machine to other machines inside the private network through a network switch, and every computer has a private IP address and can ssh into each other, I want to setup the ip forwarding, so the machines inside the private network can see the internet.
+
+### Solution
+# First turn on the ip forwarding option on the router machine:
+vim /etc/sysctl.conf
+##########
+net.ipv4.ip_forward=1
+##########
+reboot
+
+# Check if the output of the following command is "1".
+cat /proc/sys/net/ipv4/ip_forward
+
+# Then turn off all firewall (iptables) rules on the router machine.
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -F
+
+# The "iptables -L" output after turning off all iptables rules is:
+# Chain INPUT (policy ACCEPT)
+# target     prot opt source               destination
+# 
+# Chain FORWARD (policy ACCEPT)
+# target     prot opt source               destination
+# 
+# Chain OUTPUT (policy ACCEPT)
+# target     prot opt source               destination
+ 
+# Allow ip forwarding on firewall (iptables) of the router machine. $EXT is the ethernet port connected to the outside (router from ISP, or simply the internet). $INT is the ethernet port connected to the inside (switch that connects to other compute nodes)
+EXT=enp11s0
+INT=enp5s0
+
+iptables -t nat -A POSTROUTING -o $INT -j MASQUERADE
+iptables -t nat -A POSTROUTING -o $EXT -j MASQUERADE
+iptables -A FORWARD -i $EXT -o $INT -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i $INT -o $EXT -j ACCEPT
+iptables -A INPUT -i $INT -p udp --dport 53 -j ACCEPT # DNS
+iptables -A INPUT -i $INT -p tcp --dport 53 -j ACCEPT # DNS
+
+# The "iptables -L" output after allowing ip forwarding is:
+# Chain INPUT (policy ACCEPT)
+# target     prot opt source               destination
+# ACCEPT     udp  --  anywhere             anywhere             udp dpt:domain
+# ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:domain
+# 
+# Chain FORWARD (policy ACCEPT)
+# target     prot opt source               destination
+# ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+# ACCEPT     all  --  anywhere             anywhere
+# 
+# Chain OUTPUT (policy ACCEPT)
+# target     prot opt source               destination
+
+# iptables doesn't save the config by default, and the config will be lost after reboot. Install iptables-persistent to save the config.
+apt install iptables-persistent
+iptables-save > /etc/iptables/rules.v4
+
+# If the DNS of any machine stops working after this process, comment out all contents of "/etc/resolv.conf", and add the following contents:
+vim /etc/resolv.conf
+##########
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+##########
+

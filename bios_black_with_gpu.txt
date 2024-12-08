@@ -1,7 +1,7 @@
 ### Hardware
 # CPU: Intel(R) Core(TM) i9-14900K Intel(R) Core(TM)
 # GPU: NVIDIA GeForce RTX 4070 Ti SUPER
-i# Motherboard: Micro-Star B760 GAMING PLUS WIFI (MS-7D98)
+# Motherboard: Micro-Star B760 GAMING PLUS WIFI (MS-7D98)
 
 ### Software
 # OS: Ubuntu 24.04.1 LTS
