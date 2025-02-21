@@ -3,7 +3,7 @@
 
 ### Problem
 # I want to run the following perf commands in user mode
-perf record -F 9999 -o perf.data -g python pyscf_reference.py
+perf record -F 9999 -o perf.data -g python python_script.py
 perf report --stdio -n -g
 
 ### Solution
